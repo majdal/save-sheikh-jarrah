@@ -12,6 +12,7 @@
     body {
       margin: 0;
       padding: 0;
+      font-family: 'Open Sans', 'Helvetica', 'sans-serif'
     }
 
     #map {
@@ -21,95 +22,130 @@
       width: 100%;
     }
 
-    a.button {
-      display: inline-block;
-      padding: 0.7em 1.4em;
-      margin: 0 0.3em 0.3em 0;
-      border-radius: 0.15em;
-      box-sizing: border-box;
-      text-decoration: none;
-      font-family: sans-serif;
-      text-transform: uppercase;
-      font-weight: 400;
-      color: #FFFFFF;
-      background-color: #3369ff;
-      box-shadow: inset 0 -0.6em 0 -0.35em rgba(0, 0, 0, 0.17);
-      text-align: center;
-      position: relative;
+    #about {
+      position: absolute;
+      padding: 0.5em;
+      top: 0;
+      width: 20%;
+      z-index: 999;
+      background-color: rgba(255, 255, 255, .9);
     }
 
-    a.button:active {
-      top: 0.1em;
+    h1 {
+      font-size: 2em;
     }
 
-    @media all and (max-width:30em) {
-      a.button {
-        display: block;
-        margin: 0.4em auto;
+    #hide {
+      font-size: 10px;
+      cursor: pointer;
+      margin-right: 0;
+      margin-left: auto;
+      width: 30px;
+    }
+
+    @media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+      body {
+        font-size: 0.8em;
+      }
+
+      h1 {
+        font-size: 1rem;
+      }
+
+      #about {
+        width: 100%;
+        padding: 2px;
       }
     }
+
+
+    @media all and (max-width:30em) {}
   </style>
 </head>
 
 <body>
 
   <div id='map'></div>
+  <div id='about'>
+    <div id="hide">[hide]</div>
+    <h1>TITLE</h1>
+    <div id="menubox">
+      <p>DATA COLLECTED</p>
 
-  <script>
+      <div style="margin-top:2em;">
+        <div>
+          <a href="">Volunteer and help map the affected areas! ✊</a>
+        </div>
 
-    function orNull(prop) {
-      return prop ? prop : '';
-    }
+        <div><a href="https://github.com/majdal/save-sheikh-jarrah">Download code and data 💻</a></div>
+      </div>
+      <div>
+      </div>
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoibWFqZGFsIiwiYSI6ImNpeXg1ZmNkZTAwMGEzM3BkMzlzM2w4YjAifQ.gYOMj7LrxRb29u-p83d_ng';
-
-    var map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/majdal/ckoszs6jq0t4c17qko24n9yny',
-      center: [35.231944, 31.794444],
-      zoom: 8
-    });
-
-    map.on('load', function () {
-      map.addSource('locations', {
-        type: 'geojson',
-        data: 'points.geojson'
-      });
-
-      map.addLayer({
-        "id": "locations",
-        "type": "circle",
-        source: 'locations',
-        paint: {
-          'circle-color': '#4264fb',
-          'circle-radius': 8,
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#ffffff'
+      <script>
+        // hide button
+        var hideButton = document.querySelector('#hide')
+        var menubox = document.querySelector('#menubox')
+        var menuBoxShow = true
+        hideButton.onclick = function (e) {
+          menuBoxShow = !menuBoxShow
+          menubox.style = menuBoxShow ? "" : "display: none"
+          hideButton.innerHTML = menuBoxShow ? "[hide]" : "[show]"
         }
-      });
 
-      map.on('click', function (e) {
-        var features = map.queryRenderedFeatures(e.point, {
-          layers: ['locations']
+        function orNull(prop) {
+          return prop ? prop : '';
+        }
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWFqZGFsIiwiYSI6ImNpeXg1ZmNkZTAwMGEzM3BkMzlzM2w4YjAifQ.gYOMj7LrxRb29u-p83d_ng';
+
+        var map = new mapboxgl.Map({
+          container: 'map',
+          style: 'mapbox://styles/majdal/ckoszs6jq0t4c17qko24n9yny',
+          center: [35.231944, 31.794444],
+          zoom: 8
         });
 
-        if (!features.length) {
-          return;
-        }
+        map.on('load', function () {
+          map.addSource('locations', {
+            type: 'geojson',
+            data: 'points.geojson'
+          });
 
-        var feature = features[0];
+          map.addLayer({
+            "id": "locations",
+            "type": "circle",
+            source: 'locations',
+            paint: {
+              'circle-color': '#4264fb',
+              'circle-radius': 8,
+              'circle-stroke-width': 2,
+              'circle-stroke-color': '#ffffff'
+            }
+          });
 
-        var popup = new mapboxgl.Popup({ offset: [0, -15] })
-          .setLngLat(feature.geometry.coordinates)
-          .setHTML('<h3>' + orNull(feature.properties.label) + '</h3>' +
-            '<a href=' + orNull(feature.properties.link) + ' target=_blank>Source</a>' + 
-            '<p>' + orNull(feature.properties.notes) + '</p>'
-          )
-          .addTo(map);
-      });
-    })
+          map.on('click', function (e) {
+            var features = map.queryRenderedFeatures(e.point, {
+              layers: ['locations']
+            });
 
-  </script>
+            if (!features.length) {
+              return;
+            }
+
+            var feature = features[0];
+
+            var popup = new mapboxgl.Popup({ offset: [0, -15] })
+              .setLngLat(feature.geometry.coordinates)
+              .setHTML('<h3>' + orNull(feature.properties.label) + '</h3>' +
+                '<a href=' + orNull(feature.properties.link) + ' target=_blank>Source</a>' +
+                '<p>' + orNull(feature.properties.notes) + '</p>'
+              )
+              .addTo(map);
+          });
+        })
+
+      </script>
 
 </body>
 
