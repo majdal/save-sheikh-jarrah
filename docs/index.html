@@ -101,8 +101,8 @@
 
         var popup = new mapboxgl.Popup({ offset: [0, -15] })
           .setLngLat(feature.geometry.coordinates)
-          .setHTML('<h3>' + '<a href=' + orNull(feature.properties.label) + ' target=_blank>Source</a>' + 
-            '</h3><p>' + orNull(feature.properties.link) + '</p>' +
+          .setHTML('<h3>' + orNull(feature.properties.label) + '</h3>' +
+            '<a href=' + orNull(feature.properties.link) + ' target=_blank>Source</a>' + 
             '<p>' + orNull(feature.properties.notes) + '</p>'
           )
           .addTo(map);
