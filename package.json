@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "axios": "^0.21.1",
+    "turf-featurecollection": "^1.0.1",
+    "turf-point": "^2.0.1"
+  }
+}

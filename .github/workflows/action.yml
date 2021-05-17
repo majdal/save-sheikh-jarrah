@@ -1,0 +1,40 @@
+name: Build geojson
+
+on:
+  push:
+  schedule:
+    - cron:  '*/5 * * * *'
+
+jobs:  
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Use Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: "12.x"
+
+    - name: Cache node modules
+      uses: actions/cache@v2
+      with:
+          path: ~/.yarn-cache
+          key: ${{ runner.os }}-node-12-cache-${{ hashFiles('**/yarn.lock') }}
+
+    - name: Install dependencies with Yarn
+      run: yarn install --frozen-lockfile
+
+    - name: run
+      run: node index > docs/points.geojson
+
+    - name: create pull request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        title: 'Update locations.geojson'
+        branch: 'airtable-update'
+        base: master
+        commit-message: 'updates from Airtable'
