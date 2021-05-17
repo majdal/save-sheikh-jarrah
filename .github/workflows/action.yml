@@ -29,6 +29,9 @@ jobs:
       run: yarn install --frozen-lockfile
 
     - name: run
+      env:
+        AIRTABLE_KEY: ${{ secrets.AIRTABLE_KEY }}
+        AIRTABLE_BASE: ${{ secrets.AIRTABLE_BASE }}
       run: node index > docs/points.geojson
 
     - name: create pull request
