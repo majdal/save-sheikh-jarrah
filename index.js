@@ -44,6 +44,7 @@ function getData () {
       }
     }).catch(error => {
       if (error) {
+        console.error(error)
         throw new Error('Could not download data', error)
       }
     })
