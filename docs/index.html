@@ -37,6 +37,15 @@
       font-size: 2em;
     }
 
+    .triangle-down {
+      cursor: pointer;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 20px solid hsla(31, 100%, 50%, 1);
+  }
+
     #hide {
       font-size: 10px;
       cursor: pointer;
@@ -119,35 +128,55 @@
           });
 
           map.addLayer({
-            "id": "locations",
-            "type": "circle",
-            source: 'locations',
-            paint: {
-              'circle-color': '#4264fb',
-              'circle-radius': 8,
-              'circle-stroke-width': 2,
-              'circle-stroke-color': '#ffffff'
+            'id': 'circles',
+            'type': 'circle',
+            'source': 'locations',
+            'paint': {
+              'circle-radius': 0,
             }
           });
 
-          map.on('click', function (e) {
-            var features = map.queryRenderedFeatures(e.point, {
-              layers: ['locations']
-            });
+          // objects for caching and keeping track of HTML marker objects (for performance)
+          var markers = {};
+          var markersOnScreen = {};
 
-            if (!features.length) {
-              return;
+          function updateMarkers() {
+            var newMarkers = {};
+            var features = map.querySourceFeatures('locations');
+
+            // for every location on the screen, create an HTML marker for it (if we didn't yet),
+            // and add it to the map if it's not there already
+            for (var i = 0; i < features.length; i++) {
+              var coords = features[i].geometry.coordinates;
+              var props = features[i].properties;
+
+              var marker = markers[props.id];
+              if (!marker) {
+                var el = document.createElement('div')
+                el.className = 'triangle-down';
+                marker = markers[props.id] = new mapboxgl.Marker({
+                  element: el
+                }).setLngLat(coords)
+                  .setPopup(new mapboxgl.Popup().setHTML('<h3>' + orNull(props.label) + '</h3>' +
+                    '<a href=' + orNull(props.link) + ' target=_blank>Source</a>' +
+                    '<p>' + orNull(props.notes) + '</p>'
+                  ));
+              }
+              newMarkers[props.id] = marker;
+
+              if (!markersOnScreen[props.id]) marker.addTo(map);
             }
 
-            var feature = features[0];
+            // for every marker we've added previously, remove those that are no longer visible
+            for (id in markersOnScreen) {
+              if (!newMarkers[id]) markersOnScreen[id].remove();
+            }
+            markersOnScreen = newMarkers;
+          }
 
-            var popup = new mapboxgl.Popup({ offset: [0, -15] })
-              .setLngLat(feature.geometry.coordinates)
-              .setHTML('<h3>' + orNull(feature.properties.label) + '</h3>' +
-                '<a href=' + orNull(feature.properties.link) + ' target=_blank>Source</a>' +
-                '<p>' + orNull(feature.properties.notes) + '</p>'
-              )
-              .addTo(map);
+          map.on('render', function () {
+            if (!map.isSourceLoaded('locations')) return;
+            updateMarkers();
           });
         })
 
